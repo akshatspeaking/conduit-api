@@ -1,11 +1,14 @@
 var mongoose = require("mongoose");
 
 mongoose
-  .connect("mongodb://localhost/conduit", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  })
+  .connect(
+    "mongodb+srv://akshatspeaking:conduitpassword@conduit-api.i43oi.mongodb.net/conduit?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    }
+  )
   .then((result) => {
     console.log("Connected to DB");
   })

@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 var articleController = require("../../controllers/articleController");
 var commentController = require("../../controllers/commentController");
+var jwtAuth = require("../../middleware/jwt-auth");
+
 /*
    FEED
 */

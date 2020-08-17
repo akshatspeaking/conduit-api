@@ -1,5 +1,5 @@
 var passport = require("passport");
-var mongoose = require("./mongoose");
+var mongoose = require("../config/mongoose");
 var User = mongoose.models.User;
 
 var JWTstrategy = require("passport-jwt").Strategy;

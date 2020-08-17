@@ -7,45 +7,65 @@ var commentController = require("../../controllers/commentController");
 */
 
 // Global feed
-router.get("/", () => {});
+router.get("/", jwtAuth.optional, () => {});
 
 // Following Feed
-router.get("/feed", () => {});
+router.get("/feed", jwtAuth.required, () => {});
 
 /*
    ARTICLES
 */
 
 // Create new article
-router.post("/", articleController.createArticle);
+router.post("/", jwtAuth.required, articleController.createArticle);
 
 // Update article
-router.put("/:slug", articleController.updateArticle);
+router.put("/:slug", jwtAuth.required, articleController.updateArticle);
 
 // Delete article
-router.delete("/:slug", articleController.deleteArticle);
+router.delete("/:slug", jwtAuth.required, articleController.deleteArticle);
 
 // Read article
 router.get("/:slug", articleController.readArticle);
 
 // Favorite article
-router.post("/:slug/favorite", articleController.favoriteArticle);
+router.post(
+  "/:slug/favorite",
+  jwtAuth.required,
+  articleController.favoriteArticle
+);
 
 // Unfoavorite article
-router.delete("/:slug/favorite", articleController.unfavoriteArticle);
+router.delete(
+  "/:slug/favorite",
+  jwtAuth.required,
+  articleController.unfavoriteArticle
+);
 
 /*
    COMMENTS
 */
 
 // Add comment
-router.post("/:slug/comments", commentController.createComment);
+router.post(
+  "/:slug/comments",
+  jwtAuth.required,
+  commentController.createComment
+);
 
 // Update comment
-router.put("/:slug/comments/:cimmentId", commentController.updateComment);
+router.put(
+  "/:slug/comments/:cimmentId",
+  jwtAuth.required,
+  commentController.updateComment
+);
 
 // Delete comment
-router.delete("/:slug/comments/:commentId", commentController.deleteComment);
+router.delete(
+  "/:slug/comments/:commentId",
+  jwtAuth.required,
+  commentController.deleteComment
+);
 
 // Read all comments
 router.get("/:slug/comments", commentController.readAllComments);

@@ -3,12 +3,16 @@ var router = express.Router();
 var userController = require("../../controllers/userController");
 
 // View Other Profile
-router.get("/:username", userController.viewOtherProfile);
+router.get("/:username", jwtAuth.optional, userController.viewOtherProfile);
 
 // Follow User
-router.get("/:username/follow", userController.followUser);
+router.get("/:username/follow", jwtAuth.required, userController.followUser);
 
 // Unfollow user
-router.get("/:username/unfollow", userController.unfollowUser);
+router.get(
+  "/:username/unfollow",
+  jwtAuth.required,
+  userController.unfollowUser
+);
 
 module.exports = router;

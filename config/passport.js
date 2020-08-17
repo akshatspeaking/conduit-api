@@ -1,7 +1,9 @@
 var passport = require("passport");
-var LocalStrategy = require("passport-local").Strategy;
-var connection = require("./mongoose");
+var mongoose = require("./mongoose");
 var User = mongoose.models.User;
+var LocalStrategy = require("passport-local").Strategy;
+var JWTstrategy = require('passport-jwt').Strategy;
+var ExtractJWT = require('passport-jwt').ExtractJwt;
 
 async function verifyCallback(username, password, done) => {
 

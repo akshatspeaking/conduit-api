@@ -5,8 +5,13 @@ var jwt = require("jsonwebtoken");
 
 module.exports = {
   updateProfile: async (req, res) => {
-    let user = await User.findByIdAndUpdate(req.user.id, req.body.user);
-    res.json(user.returnAsUser(req.user.token));
+    console.log(req.user, "logged in user");
+
+    let user = await (
+      await User.findByIdAndUpdate(req.user.id, req.body.user)
+    ).execPopulate();
+    req.user = user;
+    res.json(req.user.returnAsUser(req.user.token));
   },
   viewMyProfile: (req, res) => {
     res.json(req.user.returnAsUser(req.user.token));

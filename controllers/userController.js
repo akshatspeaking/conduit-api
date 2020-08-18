@@ -7,40 +7,62 @@ module.exports = {
   updateProfile: async (req, res) => {
     console.log(req.user, "logged in user");
 
-    let user = await (
-      await User.findByIdAndUpdate(req.user.id, req.body.user)
-    ).execPopulate("following");
-    // req.user = user;
+    let user = await User.findByIdAndUpdate(req.user.id, req.body.user, {
+      new: true,
+    });
     user.token = req.user.token;
     req.user = user;
     res.json(req.user.returnAsUser(req.user.token));
   },
   viewMyProfile: (req, res) => {
-    res.json(user.returnAsUser(req.user.token));
+    res.json(req.user.returnAsUser(req.user.token));
   },
   viewOtherProfile: async (req, res) => {
     let user = await User.findOne({ username: req.params.username });
-    res.json(req.user.returnAsProfile(req.user));
+    res.json(user.returnAsProfile(req.user));
   },
   followUser: async (req, res) => {
+    let check = await User.findById(req.params.id);
+    if (check.followers.includes(req.user.id)) {
+      return res.send("Already following!");
+    }
+
     let user = await User.findOneAndUpdate(
       { username: req.params.username },
-      { $push: { followers: [req.user.id] } }
+      { $push: { followers: req.user.id } },
+      { new: true }
     );
-    let currUser = User.findByIdAndUpdate(req.user.id, {
-      $push: { following: [req.params.id] },
-    });
+    let currUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $push: { following: user.id },
+      },
+      { new: true }
+    );
+    currUser.token = req.user.token;
     req.user = currUser;
+    console.log("following", req.user, user);
     res.json(user.returnAsProfile(req.user));
   },
   unfollowUser: async (req, res) => {
+    let check = await User.findById(req.params.id);
+    if (!check.followers.includes(req.user.id)) {
+      return res.send("Already not following!");
+    }
+
     let user = await User.findOneAndUpdate(
       { username: req.params.username },
-      { $pull: { followers: [req.user.id] } }
+      { $pull: { followers: req.user.id } },
+      { new: true }
     );
-    let currUser = User.findByIdAndUpdate(req.user.id, {
-      $pull: { following: [req.params.id] },
-    });
+    let currUser = User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $pull: { following: user.id },
+      },
+      { new: true }
+    );
+    currUser.token = req.user.token;
     req.user = currUser;
     res.json(user.returnAsProfile(req.user));
   },

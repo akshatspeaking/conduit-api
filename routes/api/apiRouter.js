@@ -12,16 +12,16 @@ router.use("/articles", articleRouter);
 // Get tags
 router.get("/tags", async (req, res, next) => {
   let articles = await Article.find();
-  let tags = [];
+  let tagsToSend = [];
   articles.forEach((article) => {
-    article.taglist.forEach((tag) => {
-      if (!tags.includes(tag)) {
-        tags.push(tag);
+    article.tagList.forEach((tag) => {
+      if (!tagsToSend.includes(tag)) {
+        tagsToSend.push(tag);
       }
     });
   });
   res.send({
-    tags: tags,
+    tags: tagsToSend,
   });
 });
 

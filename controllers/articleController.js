@@ -20,7 +20,8 @@ module.exports = {
         let article = await (
           await Article.findOneAndUpdate(
             { slug: req.params.slug },
-            req.body.article
+            req.body.article,
+            { new: true }
           )
         ).execPopulate("author");
         res.json(article.returnSingleArticle(req.user));
@@ -55,25 +56,53 @@ module.exports = {
     // }
   },
   favoriteArticle: async (req, res) => {
+    let check = await Article.findOne({ slug: req.params.slug });
+    if (check.favorited.includes(req.user.id)) {
+      return res.send("Already fav!");
+    }
+
     let article = await Article.findOneAndUpdate(
       { slug: req.params.slug },
-      { $push: { favBy: [req.user.id] } }
+      { $push: { favorited: req.user.id } },
+      { new: true }
     );
-    let currUser = User.findByIdAndUpdate(req.user.id, {
-      $push: { favorites: [article.id] },
-    });
+    let currUser = User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $push: { favorites: article.id },
+      },
+      { new: true }
+    );
+    currUser.token = req.user.token;
     req.user = currUser;
-    res.json(article.returnSingleArticle(req.user));
+    let articleToReturn = await (
+      await Article.findById(article.id)
+    ).execPopulate("author");
+    res.json(articleToReturn.returnSingleArticle(req.user));
   },
   unfavoriteArticle: async (req, res) => {
+    let check = await Article.findOne({ slug: req.params.slug });
+    if (!check.favorited.includes(req.user.id)) {
+      return res.send("Already not in favs!");
+    }
+
     let article = await Article.findOneAndUpdate(
       { slug: req.params.slug },
-      { $pull: { favBy: [req.user.id] } }
+      { $pull: { favorited: req.user.id } },
+      { new: true }
     );
-    let currUser = User.findByIdAndUpdate(req.user.id, {
-      $pull: { favorites: [article.id] },
-    });
+    let currUser = User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $pull: { favorites: article.id },
+      },
+      { new: true }
+    );
+    currUser.token = req.user.token;
     req.user = currUser;
-    res.json(article.returnSingleArticle(req.user));
+    let articleToReturn = await (
+      await Article.findById(article.id)
+    ).execPopulate("author");
+    res.json(articleToReturn.returnSingleArticle(req.user));
   },
 };

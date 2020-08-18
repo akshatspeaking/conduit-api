@@ -11,16 +11,28 @@ var User = require("../../models/User");
 
 // Global feed
 router.get("/", jwtAuth.optional, async (req, res, next) => {
-  let articles = await Article.find({
-    author: req.query.author || "",
-    tagList: { $in: [req.query.tag || ""] },
-    favBy: { $in: [req.query.favorited || ""] },
-  })
+  let limit = req.query.limit || 20;
+  let offset = req.query.offset || 0;
+
+  let queries = ["author", "tags", "favorited"];
+  let opts = {};
+  queries.forEach(async (q) => {
+    if (req.query[q]) {
+      if (q == "favorited") {
+        let u = await User.findOne({ username: req.query.favorited });
+        let id = u.id;
+        opts[q] = id;
+      } else {
+        opts[q] = req.query[q];
+      }
+    }
+  });
+  let articles = await Article.find(opts)
     .sort({
       createdAt: -1,
     })
-    .skip(req.query.offset || 0)
-    .limit(req.query.limit || 20);
+    .skip(offset)
+    .limit(limit);
   let toReturn = [];
   articles.forEach(async (article) => {
     let populated = await article.execPopulate("author");
@@ -34,27 +46,36 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
 
 // Following Feed
 router.get("/feed", jwtAuth.required, async (req, res, next) => {
-  let x = await Article.find()
-    .execPopulate({
-      path: "author",
-      populate: "followers",
-    })
-    .match(author.following);
+  // let x = await Article.find()
+  //   .execPopulate({
+  //     path: "author",
+  //     populate: "followers",
+  //   })
+  //   .match(author.following);
 
-  // let userNow = await (await User.findById(req.user.id)).execPopulate({
-  //   path: "following",
-  //   populate: "articles",
-  // });
-  // let toReturn = [];
-  // userNow.following.forEach((author) => {
-  //   author.articles.forEach((article) => {
-  //     toReturn.push(article.returnSingleArticle(req.user).article);
-  //   });
-  // });
-  // res.json({
-  //   articles: toReturn,
-  //   articlesCount: toReturn.length,
-  // });
+  let limit = req.query.limit || 20;
+  let offset = req.query.offset || 0;
+
+  let articles = await Article.find({
+    author: { $in: req.user.following },
+  })
+    .populate("author")
+    .sort({
+      createdAt: -1,
+    })
+    .skip(offset)
+    .limit(limit);
+
+  let toReturn = [];
+
+  articles.forEach((article) => {
+    toReturn.push(article.returnSingleArticle(req.user));
+  });
+
+  res.json({
+    articles: toReturn,
+    articlesCount: toReturn.length,
+  });
 });
 
 /*
@@ -100,7 +121,7 @@ router.post(
 
 // Delete comment
 router.delete(
-  "/:slug/comments/:commentId",
+  "/:slug/comments/:commentid",
   jwtAuth.required,
   commentController.deleteComment
 );

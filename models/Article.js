@@ -13,7 +13,7 @@ var articleSchema = new Schema(
     body: String,
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    favBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    favorited: [{ type: Schema.Types.ObjectId, ref: "User" }],
     tagList: [String],
   },
   { timestamps: true }
@@ -26,11 +26,15 @@ articleSchema.methods.returnSingleArticle = function (user) {
       title: this.title,
       description: this.description,
       body: this.body,
-      taglist: this.tagList,
+      tagList: this.tagList,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      favorited: !user ? false : this.favBy.includes(user.id) ? true : false,
-      favoritesCount: this.favBy.length,
+      favorited: !user
+        ? false
+        : this.favorited.includes(user.id)
+        ? true
+        : false,
+      favoritesCount: this.favorited.length,
       author: {
         username: this.author.username,
         bio: this.author.bio,
@@ -46,7 +50,7 @@ articleSchema.methods.returnSingleArticle = function (user) {
 };
 
 articleSchema.pre("save", function (next) {
-  this.slug = slugify(this.title);
+  this.slug = slugify(this.title.toLowerCase());
   next();
 });
 

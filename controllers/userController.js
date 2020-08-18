@@ -41,9 +41,9 @@ module.exports = {
     try {
       console.log("registering ");
       let user = await User.create({
-        email: req.body.email,
-        username: req.body.username,
-        password: req.body.password,
+        email: req.body.user.email,
+        username: req.body.user.username,
+        password: req.body.user.password,
       });
       let token = jwt.sign(user.id, process.env.secret);
       let userJson = user.returnAsUser(token);

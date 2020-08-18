@@ -11,7 +11,9 @@ module.exports = {
       await User.findByIdAndUpdate(req.user.id, req.body.user)
     ).execPopulate("following");
     // req.user = user;
-    res.json(user.returnAsUser(req.user.token));
+    user.token = req.user.token;
+    req.user = user;
+    res.json(req.user.returnAsUser(req.user.token));
   },
   viewMyProfile: (req, res) => {
     res.json(user.returnAsUser(req.user.token));

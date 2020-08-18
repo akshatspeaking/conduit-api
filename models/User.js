@@ -98,7 +98,7 @@ userSchema.methods.returnAsUser = function (token) {
       email: this.email,
       token: token,
       bio: this.bio,
-      image: this.avatar,
+      image: this.image,
     },
   };
 };

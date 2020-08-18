@@ -9,12 +9,12 @@ module.exports = {
 
     let user = await (
       await User.findByIdAndUpdate(req.user.id, req.body.user)
-    ).execPopulate();
-    req.user = user;
-    res.json(req.user.returnAsUser(req.user.token));
+    ).execPopulate("following");
+    // req.user = user;
+    res.json(user.returnAsUser(req.user.token));
   },
   viewMyProfile: (req, res) => {
-    res.json(req.user.returnAsUser(req.user.token));
+    res.json(user.returnAsUser(req.user.token));
   },
   viewOtherProfile: async (req, res) => {
     let user = await User.findOne({ username: req.params.username });

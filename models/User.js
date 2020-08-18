@@ -38,7 +38,7 @@ var userSchema = new Schema(
       minlength: [6, "Password must be at least 6 chars long"],
     },
     bio: String,
-    avatar: String,
+    image: String,
     articles: [
       {
         type: Schema.Types.ObjectId,

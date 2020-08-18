@@ -1,60 +1,60 @@
 const passport = require("passport");
 const localStrategy = require("passport-local").Strategy;
-const UserModel = require("../models/User");
+const User = require("../models/User");
+var jwt = require("jsonwebtoken");
 
 module.exports = {
-  updateProfile: (req, res) => {},
-  viewMyProfile: (req, res) => {},
-  viewOtherProfile: (req, res) => {},
-  followUser: (req, res) => {},
-  unfollowUser: (req, res) => {},
-  registerUser: (req, res) => {
-    passport.use(
-      "signup",
-      new localStrategy(
-        {
-          usernameField: "username",
-          emailField: "email",
-          passwordField: "password",
-          session: false,
-        },
-        async (email, username, password, done) => {
-          try {
-            const user = await UserModel.create({ email, username, password });
-            return done(null, user);
-          } catch (error) {
-            done(error);
-          }
-        }
-      )
+  updateProfile: async (req, res) => {
+    let user = await User.findByIdAndUpdate(req.user.id, req.body);
+    res.json(user.returnAsUser(req.user.token));
+  },
+  viewMyProfile: (req, res) => {
+    res.json(req.user.returnAsUser(req.user.token));
+  },
+  viewOtherProfile: async (req, res) => {
+    let user = await User.findOne({ username: req.params.username });
+    res.json(req.user.returnAsProfile(req.user));
+  },
+  followUser: async (req, res) => {
+    let user = await User.findOneAndUpdate(
+      { username: req.params.username },
+      { $push: { followers: [req.user.id] } }
     );
+    let currUser = User.findByIdAndUpdate(req.user.id, {
+      $push: { following: [req.params.id] },
+    });
+    req.user = currUser;
+    res.json(user.returnAsProfile(req.user));
+  },
+  unfollowUser: async (req, res) => {
+    let user = await User.findOneAndUpdate(
+      { username: req.params.username },
+      { $pull: { followers: [req.user.id] } }
+    );
+    let currUser = User.findByIdAndUpdate(req.user.id, {
+      $pull: { following: [req.params.id] },
+    });
+    req.user = currUser;
+    res.json(user.returnAsProfile(req.user));
+  },
+  registerUser: async (req, res, next) => {
+    try {
+      console.log("registering ");
+      let user = await User.create({
+        email: req.body.email,
+        username: req.body.username,
+        password: req.body.password,
+      });
+      let token = jwt.sign(user.id, process.env.secret);
+      let userJson = user.returnAsUser(token);
+      res.json(userJson);
+    } catch (error) {
+      next(error);
+    }
   },
   loginUser: (req, res) => {
-    passport.use(
-      "login",
-      new localStrategy(
-        {
-          usernameField: "email",
-          passwordField: "password",
-        },
-        async (email, password, done) => {
-          try {
-            const user = await UserModel.findOne({ email });
-            if (!user) {
-              return done(null, false, { message: "User not found" });
-            }
-            //Validate password and make sure it matches with the corresponding hash stored in the database
-            //If the passwords match, it returns a value of true.
-            const validate = user.verifyPassword(password);
-            if (!validate) {
-              return done(null, false, { message: "Wrong Password" });
-            }
-            return done(null, user, { message: "Logged in Successfully" });
-          } catch (error) {
-            return done(error);
-          }
-        }
-      )
-    );
+    let token = jwt.sign(req.user.id, process.env.secret);
+    let userJson = req.user.returnAsUser(token);
+    res.json(userJson);
   },
 };

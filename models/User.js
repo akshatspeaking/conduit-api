@@ -91,4 +91,16 @@ userSchema.methods.returnAsProfile = function (user) {
   };
 };
 
+userSchema.methods.returnAsUser = function (token) {
+  return {
+    user: {
+      username: this.username,
+      email: this.email,
+      token: token,
+      bio: this.bio,
+      image: this.avatar,
+    },
+  };
+};
+
 module.exports = mongoose.model("User", userSchema);

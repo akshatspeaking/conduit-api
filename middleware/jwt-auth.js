@@ -1,64 +1,60 @@
-var passport = require("passport");
-var mongoose = require("../config/mongoose");
-var User = mongoose.models.User;
-
-var JWTstrategy = require("passport-jwt").Strategy;
-var ExtractJWT = require("passport-jwt").ExtractJwt;
-
-const opts = {
-  jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme("Token"),
-  secretOrKey: process.env.secret,
-};
+var User = require("../models/User");
+var jwt = require("jsonwebtoken");
 
 module.exports = {
-  optional: () => {
-    passport.use(
-      "jwt",
-      new JWTstrategy(opts, (jwt_payload, done) => {
-        try {
-          User.findOne({
-            where: {
-              username: jwt_payload.id,
-            },
-          }).then((user) => {
-            if (user) {
-              console.log("user found in db in passport");
-              // note the return removed with passport JWT - add this return for passport local
-              done(null, user);
-            } else {
-              console.log("user not found in db");
-              done(null, false);
-            }
-          });
-        } catch (err) {
-          done(err);
+  optional: async (req, res, next) => {
+    try {
+      if (req.headers.authorization) {
+        var decoded = jwt.verify(
+          req.headers.authorization.split(" ")[1],
+          process.env.secret
+        );
+        let user = await User.findById(decoded);
+        if (user) {
+          console.log("logged in - continuing");
+          req.user = user;
+          req.user.token = req.headers.authorization.split(" ")[1];
+          return next();
+        } else {
+          console.log("NOT logged in - continuing");
+          req.user = null;
+          return next();
         }
-      })
-    );
+      } else {
+        console.log("NOT logged in - continuing");
+        req.user = null;
+        return next();
+      }
+    } catch (error) {
+      next(error);
+    }
   },
-  required: () => {
-    passport.use(
-      "jwt",
-      new JWTstrategy(opts, (jwt_payload, done) => {
-        try {
-          User.findOne({
-            where: {
-              username: jwt_payload.id,
-            },
-          }).then((user) => {
-            if (user) {
-              console.log("user found in db in passport");
-              // note the return removed with passport JWT - add this return for passport local
-              done(null, user);
-            } else {
-              console.log("user not found in db");
-              done("Please log in to continue!");
-            }
-          });
-        } catch (err) {
-          done(err);
+  required: async (req, res, next) => {
+    try {
+      if (req.headers.authorization) {
+        var decoded = jwt.verify(
+          req.headers.authorization.split(" ")[1],
+          process.env.secret
+        );
+        let user = await User.findById(decoded);
+        if (user) {
+          console.log("logged in - continuing");
+
+          req.user = user;
+          req.user.token = req.headers.authorization.split(" ")[1];
+          return next();
+        } else {
+          console.log("NOT logged in - not continuing");
+          req.user = null;
+          res.send("UNAUTHORIZED");
         }
-      })
-    );
+      } else {
+        console.log("NOT logged in - not continuing");
+        req.user = null;
+        res.send("UNAUTHORIZED");
+      }
+    } catch (error) {
+      next(error);
+    }
   },
 };

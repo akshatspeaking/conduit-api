@@ -8,6 +8,7 @@ var mongoose = require("./config/mongoose");
 
 var indexRouter = require("./routes/index");
 var apiRouter = require("./routes/api/apiRouter");
+const passport = require("passport");
 
 require("dotenv").config();
 
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(passport.initialize());
+require("./config/passport")(passport);
 
 app.use("/", indexRouter);
 app.use("/api", apiRouter);

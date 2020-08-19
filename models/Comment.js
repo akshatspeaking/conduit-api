@@ -3,9 +3,17 @@ var Schema = mongoose.Schema;
 
 var commentSchema = new Schema(
   {
-    article: { type: Schema.Types.ObjectId, required: true, ref: "Article" },
+    article: {
+      type: Schema.Types.ObjectId,
+      required: [true, "ArticleId must be valid"],
+      ref: "Article",
+    },
     body: String,
-    author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+    author: {
+      type: Schema.Types.ObjectId,
+      required: [true, "Every comment must have an author"],
+      ref: "User",
+    },
   },
   { timestamps: true }
 );

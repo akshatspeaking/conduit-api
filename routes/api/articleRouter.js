@@ -67,7 +67,7 @@ router.get("/feed", jwtAuth.required, async (req, res, next) => {
     let toReturn = [];
 
     articles.forEach((article) => {
-      toReturn.push(article.returnSingleArticle(req.user));
+      toReturn.push(article.returnSingleArticle(req.user).article);
     });
 
     res.json({

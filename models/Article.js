@@ -6,13 +6,17 @@ var articleSchema = new Schema(
   {
     slug: {
       type: String,
-      unique: true,
+      unique: [true, "Slug must be unique for each article"],
     },
     title: String,
     description: String,
     body: String,
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
-    author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+    author: {
+      type: Schema.Types.ObjectId,
+      required: [true, "Article needs author"],
+      ref: "User",
+    },
     favorited: [{ type: Schema.Types.ObjectId, ref: "User" }],
     tagList: [String],
   },

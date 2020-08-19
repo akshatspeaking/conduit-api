@@ -34,7 +34,7 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
       })
       .skip(offset)
       .limit(limit);
-    let toReturn = [];
+    var toReturn = [];
     articles.forEach(async (article) => {
       let populated = await article.execPopulate("author");
       toReturn.push(populated.returnSingleArticle(req.user).article);

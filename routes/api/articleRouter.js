@@ -38,10 +38,10 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
     articles.forEach(async (article) => {
       let populated = await article.execPopulate("author");
       toReturn.push(populated.returnSingleArticle(req.user).article);
-      res.json({
-        articles: toReturn,
-        articlesCount: toReturn.length,
-      });
+    });
+    res.json({
+      articles: toReturn,
+      articlesCount: toReturn.length,
     });
   } catch (error) {
     next(error);

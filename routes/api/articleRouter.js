@@ -33,10 +33,10 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
         createdAt: -1,
       })
       .skip(offset)
-      .limit(limit)
-      .execPopulate("author");
+      .limit(limit);
     var toReturn = [];
-    articles.forEach((article) => {
+    articles.forEach(async (article) => {
+      article = await article.execPopulate("author");
       toReturn.push(article.returnSingleArticle(req.user));
     });
     res.json({

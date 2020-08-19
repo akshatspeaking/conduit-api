@@ -81,14 +81,17 @@ userSchema.methods.verifyPassword = function (plainpwd) {
 };
 
 userSchema.methods.returnAsProfile = function (user) {
-  return {
-    profile: {
-      username: this.username,
-      bio: this.bio,
-      image: this.avatar,
-      following: this.followers.includes(user.id) ? true : false,
-    },
+  let profile = {
+    username: this.username,
+    bio: this.bio,
+    image: this.avatar,
   };
+  if (!user) {
+    profile.following = false;
+  } else {
+    profile.following = this.followers.includes(user.id) ? true : false;
+  }
+  return { profile };
 };
 
 userSchema.methods.returnAsUser = function (token) {

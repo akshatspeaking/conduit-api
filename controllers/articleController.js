@@ -48,61 +48,72 @@ module.exports = {
     }
   },
   readArticle: async (req, res) => {
-    let article = await (
-      await Article.findOne({ slug: req.params.slug })
-    ).execPopulate("author");
-    // if (req.user) {
-    res.json(article.returnSingleArticle(req.user));
-    // }
+    try {
+      let article = await (
+        await Article.findOne({ slug: req.params.slug })
+      ).execPopulate("author");
+      res.json(article.returnSingleArticle(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
   favoriteArticle: async (req, res) => {
-    let check = await Article.findOne({ slug: req.params.slug });
-    if (check.favorited.includes(req.user.id)) {
-      return res.send("Already fav!");
-    }
+    try {
+      let check = await Article.findOne({ slug: req.params.slug });
+      if (check.favorited.includes(req.user.id)) {
+        return res.send("Already fav!");
+      }
 
-    let article = await Article.findOneAndUpdate(
-      { slug: req.params.slug },
-      { $push: { favorited: req.user.id } },
-      { new: true }
-    );
-    let currUser = User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $push: { favorites: article.id },
-      },
-      { new: true }
-    );
-    currUser.token = req.user.token;
-    req.user = currUser;
-    let articleToReturn = await (
-      await Article.findById(article.id)
-    ).execPopulate("author");
-    res.json(articleToReturn.returnSingleArticle(req.user));
+      let article = await Article.findOneAndUpdate(
+        { slug: req.params.slug },
+        { $push: { favorited: req.user.id } },
+        { new: true }
+      );
+      let currUser = User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $push: { favorites: article.id },
+        },
+        { new: true }
+      );
+      currUser.token = req.user.token;
+      req.user = currUser;
+      let articleToReturn = await (
+        await Article.findById(article.id)
+      ).execPopulate("author");
+      res.json(articleToReturn.returnSingleArticle(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
-  unfavoriteArticle: async (req, res) => {
-    let check = await Article.findOne({ slug: req.params.slug });
-    if (!check.favorited.includes(req.user.id)) {
-      return res.send("Already not in favs!");
-    }
 
-    let article = await Article.findOneAndUpdate(
-      { slug: req.params.slug },
-      { $pull: { favorited: req.user.id } },
-      { new: true }
-    );
-    let currUser = User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $pull: { favorites: article.id },
-      },
-      { new: true }
-    );
-    currUser.token = req.user.token;
-    req.user = currUser;
-    let articleToReturn = await (
-      await Article.findById(article.id)
-    ).execPopulate("author");
-    res.json(articleToReturn.returnSingleArticle(req.user));
+  unfavoriteArticle: async (req, res) => {
+    try {
+      let check = await Article.findOne({ slug: req.params.slug });
+      if (!check.favorited.includes(req.user.id)) {
+        return res.send("Already not in favs!");
+      }
+
+      let article = await Article.findOneAndUpdate(
+        { slug: req.params.slug },
+        { $pull: { favorited: req.user.id } },
+        { new: true }
+      );
+      let currUser = User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $pull: { favorites: article.id },
+        },
+        { new: true }
+      );
+      currUser.token = req.user.token;
+      req.user = currUser;
+      let articleToReturn = await (
+        await Article.findById(article.id)
+      ).execPopulate("author");
+      res.json(articleToReturn.returnSingleArticle(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
 };

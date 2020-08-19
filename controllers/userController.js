@@ -5,66 +5,81 @@ var jwt = require("jsonwebtoken");
 
 module.exports = {
   updateProfile: async (req, res) => {
-    console.log(req.user, "logged in user");
-
-    let user = await User.findByIdAndUpdate(req.user.id, req.body.user, {
-      new: true,
-    });
-    user.token = req.user.token;
-    req.user = user;
-    res.json(req.user.returnAsUser(req.user.token));
+    try {
+      console.log(req.user, "logged in user");
+      let user = await User.findByIdAndUpdate(req.user.id, req.body.user, {
+        new: true,
+      });
+      user.token = req.user.token;
+      req.user = user;
+      res.json(req.user.returnAsUser(req.user.token));
+    } catch (error) {
+      next(error);
+    }
   },
   viewMyProfile: (req, res) => {
     res.json(req.user.returnAsUser(req.user.token));
   },
   viewOtherProfile: async (req, res) => {
-    let user = await User.findOne({ username: req.params.username });
-    res.json(user.returnAsProfile(req.user));
+    try {
+      let user = await User.findOne({ username: req.params.username });
+      res.json(user.returnAsProfile(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
   followUser: async (req, res) => {
-    let check = await User.findById(req.params.id);
-    if (check.followers.includes(req.user.id)) {
-      return res.send("Already following!");
-    }
+    try {
+      let check = await User.findById(req.params.id);
+      if (check.followers.includes(req.user.id)) {
+        return res.send("Already following!");
+      }
 
-    let user = await User.findOneAndUpdate(
-      { username: req.params.username },
-      { $push: { followers: req.user.id } },
-      { new: true }
-    );
-    let currUser = await User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $push: { following: user.id },
-      },
-      { new: true }
-    );
-    currUser.token = req.user.token;
-    req.user = currUser;
-    console.log("following", req.user, user);
-    res.json(user.returnAsProfile(req.user));
+      let user = await User.findOneAndUpdate(
+        { username: req.params.username },
+        { $push: { followers: req.user.id } },
+        { new: true }
+      );
+      let currUser = await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $push: { following: user.id },
+        },
+        { new: true }
+      );
+      currUser.token = req.user.token;
+      req.user = currUser;
+      console.log("following", req.user, user);
+      res.json(user.returnAsProfile(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
   unfollowUser: async (req, res) => {
-    let check = await User.findById(req.params.id);
-    if (!check.followers.includes(req.user.id)) {
-      return res.send("Already not following!");
-    }
+    try {
+      let check = await User.findById(req.params.id);
+      if (!check.followers.includes(req.user.id)) {
+        return res.send("Already not following!");
+      }
 
-    let user = await User.findOneAndUpdate(
-      { username: req.params.username },
-      { $pull: { followers: req.user.id } },
-      { new: true }
-    );
-    let currUser = User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $pull: { following: user.id },
-      },
-      { new: true }
-    );
-    currUser.token = req.user.token;
-    req.user = currUser;
-    res.json(user.returnAsProfile(req.user));
+      let user = await User.findOneAndUpdate(
+        { username: req.params.username },
+        { $pull: { followers: req.user.id } },
+        { new: true }
+      );
+      let currUser = User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $pull: { following: user.id },
+        },
+        { new: true }
+      );
+      currUser.token = req.user.token;
+      req.user = currUser;
+      res.json(user.returnAsProfile(req.user));
+    } catch (error) {
+      next(error);
+    }
   },
   registerUser: async (req, res, next) => {
     try {

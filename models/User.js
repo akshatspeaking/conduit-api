@@ -2,23 +2,23 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 var bcrypt = require("bcrypt");
 
-function handleErrors(err) {
-  console.log(err.message, err.code);
+// function handleErrors(err) {
+//   console.log(err.message, err.code);
 
-  let error = {
-    email: "",
-    username: "",
-    password: "",
-  };
+//   let error = {
+//     email: "",
+//     username: "",
+//     password: "",
+//   };
 
-  if (err.message.includes("user validation failed")) {
-    Object.values(err.errors).forEach(({ properties }) => {
-      error[properties.path] = properties.message;
-    });
-  }
+//   if (err.message.includes("user validation failed")) {
+//     Object.values(err.errors).forEach(({ properties }) => {
+//       error[properties.path] = properties.message;
+//     });
+//   }
 
-  return errors;
-}
+//   return errors;
+// }
 
 var userSchema = new Schema(
   {
@@ -68,8 +68,6 @@ var userSchema = new Schema(
 );
 
 userSchema.pre("save", function (next) {
-  // .this points to object that is going to be saved to mongodb along with _id and timestamps
-  // cannot use arrow functions with hooks as they have no .this
   if (this.password) {
     this.password = bcrypt.hashSync(this.password, 10);
   }

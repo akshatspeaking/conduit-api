@@ -11,71 +11,72 @@ var User = require("../../models/User");
 
 // Global feed
 router.get("/", jwtAuth.optional, async (req, res, next) => {
-  let limit = req.query.limit || 20;
-  let offset = req.query.offset || 0;
+  try {
+    let limit = req.query.limit || 20;
+    let offset = req.query.offset || 0;
 
-  let queries = ["author", "tags", "favorited"];
-  let opts = {};
-  queries.forEach(async (q) => {
-    if (req.query[q]) {
-      if (q == "favorited") {
-        let u = await User.findOne({ username: req.query.favorited });
-        let id = u.id;
-        opts[q] = id;
-      } else {
-        opts[q] = req.query[q];
+    let queries = ["author", "tags", "favorited"];
+    let opts = {};
+    queries.forEach(async (q) => {
+      if (req.query[q]) {
+        if (q == "favorited") {
+          let u = await User.findOne({ username: req.query.favorited });
+          let id = u.id;
+          opts[q] = id;
+        } else {
+          opts[q] = req.query[q];
+        }
       }
-    }
-  });
-  let articles = await Article.find(opts)
-    .sort({
-      createdAt: -1,
-    })
-    .skip(offset)
-    .limit(limit);
-  let toReturn = [];
-  articles.forEach(async (article) => {
-    let populated = await article.execPopulate("author");
-    toReturn.push(populated.returnSingleArticle(req.user).article);
-    res.json({
-      articles: toReturn,
-      articlesCount: toReturn.length,
     });
-  });
+    let articles = await Article.find(opts)
+      .sort({
+        createdAt: -1,
+      })
+      .skip(offset)
+      .limit(limit);
+    let toReturn = [];
+    articles.forEach(async (article) => {
+      let populated = await article.execPopulate("author");
+      toReturn.push(populated.returnSingleArticle(req.user).article);
+      res.json({
+        articles: toReturn,
+        articlesCount: toReturn.length,
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Following Feed
 router.get("/feed", jwtAuth.required, async (req, res, next) => {
-  // let x = await Article.find()
-  //   .execPopulate({
-  //     path: "author",
-  //     populate: "followers",
-  //   })
-  //   .match(author.following);
+  try {
+    let limit = req.query.limit || 20;
+    let offset = req.query.offset || 0;
 
-  let limit = req.query.limit || 20;
-  let offset = req.query.offset || 0;
-
-  let articles = await Article.find({
-    author: { $in: req.user.following },
-  })
-    .populate("author")
-    .sort({
-      createdAt: -1,
+    let articles = await Article.find({
+      author: { $in: req.user.following },
     })
-    .skip(offset)
-    .limit(limit);
+      .populate("author")
+      .sort({
+        createdAt: -1,
+      })
+      .skip(offset)
+      .limit(limit);
 
-  let toReturn = [];
+    let toReturn = [];
 
-  articles.forEach((article) => {
-    toReturn.push(article.returnSingleArticle(req.user));
-  });
+    articles.forEach((article) => {
+      toReturn.push(article.returnSingleArticle(req.user));
+    });
 
-  res.json({
-    articles: toReturn,
-    articlesCount: toReturn.length,
-  });
+    res.json({
+      articles: toReturn,
+      articlesCount: toReturn.length,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /*

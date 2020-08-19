@@ -35,13 +35,12 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
       })
       .skip(offset)
       .limit(limit)
-      .populate("author", "email name followers");
+      .populate("author");
     var toReturn = [];
     console.log(articles);
 
-    articles.forEach(async (article) => {
-      let populatedArticle = await article.execPopulate("author");
-      toReturn.push(populatedArticle.returnSingleArticle(req.user).article);
+    articles.forEach((article) => {
+      toReturn.push(article.returnSingleArticle(req.user).article);
     });
     res.json({
       articles: toReturn,

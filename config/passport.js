@@ -17,7 +17,8 @@ module.exports = (passport) => {
         try {
           const user = await User.findOne({ email });
           if (!user) {
-            return done(null, false, { message: "User not found" });
+            console.log("NO USER FOUND");
+            return done(null, false, "User not found");
           }
           //Validate password and make sure it matches with the corresponding hash stored in the database
           //If the passwords match, it returns a value of true.

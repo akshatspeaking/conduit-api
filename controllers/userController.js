@@ -32,7 +32,9 @@ module.exports = {
     try {
       let check = await User.findById(req.params.id);
       if (check.followers.includes(req.user.id)) {
-        return res.send("Already following!");
+        return res
+          .status(422)
+          .json({ error: "You are already following this user" });
       }
 
       let user = await User.findOneAndUpdate(
@@ -59,7 +61,9 @@ module.exports = {
     try {
       let check = await User.findById(req.params.id);
       if (!check.followers.includes(req.user.id)) {
-        return res.send("Already not following!");
+        return res
+          .status(422)
+          .json({ error: "You are already not following this user" });
       }
 
       let user = await User.findOneAndUpdate(

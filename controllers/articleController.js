@@ -26,7 +26,9 @@ module.exports = {
         ).execPopulate("author");
         res.json(article.returnSingleArticle(req.user));
       } else {
-        res.send("You are not the author of this article");
+        res
+          .status(403)
+          .json({ error: "You are not authorized to perform this action" });
       }
     } catch (error) {
       next(error);
@@ -41,7 +43,9 @@ module.exports = {
         ).execPopulate("author");
         res.send("Article Deleted");
       } else {
-        res.send("You are not the author of this article");
+        res
+          .status(403)
+          .json({ error: "You are not authorized to perform this action" });
       }
     } catch (error) {
       next(error);
@@ -61,7 +65,9 @@ module.exports = {
     try {
       let check = await Article.findOne({ slug: req.params.slug });
       if (check.favorited.includes(req.user.id)) {
-        return res.send("Already fav!");
+        return res
+          .status(422)
+          .json({ error: "You have already favorited this article" });
       }
 
       let article = await Article.findOneAndUpdate(
@@ -91,7 +97,9 @@ module.exports = {
     try {
       let check = await Article.findOne({ slug: req.params.slug });
       if (!check.favorited.includes(req.user.id)) {
-        return res.send("Already not in favs!");
+        return res
+          .status(422)
+          .json({ error: "You have already unfavorited this article" });
       }
 
       let article = await Article.findOneAndUpdate(

@@ -26,9 +26,11 @@ module.exports = {
       let toEdit = await Comment.findById(req.params.commentid);
       if (toEdit.author == req.user.id) {
         let comment = await Comment.findByIdAndDelete(req.params.commentId);
-        res.send("Comment Deleted");
+        return res.send("Comment Deleted");
       } else {
-        res.send("You are not the author of this comment");
+        return res
+          .status(403)
+          .json({ error: "You are not the author of this comment" });
       }
     } catch (error) {
       next(error);

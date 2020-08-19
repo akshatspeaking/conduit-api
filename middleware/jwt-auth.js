@@ -47,12 +47,12 @@ module.exports = {
         } else {
           console.log("NOT logged in - not continuing");
           req.user = null;
-          res.send("UNAUTHORIZED");
+          res.status(401).json({ error: "Not Authorized" });
         }
       } else {
         console.log("NOT logged in - not continuing");
         req.user = null;
-        res.send("UNAUTHORIZED");
+        res.status(401).json({ error: "Not Authorized" });
       }
     } catch (error) {
       next(error);

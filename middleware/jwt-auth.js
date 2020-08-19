@@ -36,6 +36,7 @@ module.exports = {
           req.headers.authorization.split(" ")[1],
           process.env.secret
         );
+        console.log(decoded);
         let user = await User.findById(decoded);
         if (user) {
           console.log("logged in - continuing");

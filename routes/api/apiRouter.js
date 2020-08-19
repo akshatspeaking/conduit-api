@@ -11,15 +11,9 @@ router.use("/profiles", profileRouter);
 router.use("/articles", articleRouter);
 // Get tags
 router.get("/tags", async (req, res, next) => {
-  let articles = await Article.find();
-  let tagsToSend = [];
-  articles.forEach((article) => {
-    article.tagList.forEach((tag) => {
-      if (!tagsToSend.includes(tag)) {
-        tagsToSend.push(tag);
-      }
-    });
-  });
+  let tagsToSend = await Article.distinct("tagList");
+  console.log(tagsToSend);
+
   res.send({
     tags: tagsToSend,
   });

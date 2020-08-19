@@ -28,16 +28,20 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
         }
       }
     });
+    console.log(opts);
     let articles = await Article.find(opts)
       .sort({
         createdAt: -1,
       })
       .skip(offset)
-      .limit(limit);
+      .limit(limit)
+      .populate("author", "email name followers");
     var toReturn = [];
+    console.log(articles);
+
     articles.forEach(async (article) => {
-      article = await article.execPopulate("author");
-      toReturn.push(article.returnSingleArticle(req.user));
+      let populatedArticle = await article.execPopulate("author");
+      toReturn.push(populatedArticle.returnSingleArticle(req.user).article);
     });
     res.json({
       articles: toReturn,

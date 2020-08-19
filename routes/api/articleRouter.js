@@ -12,8 +12,8 @@ var User = require("../../models/User");
 // Global feed
 router.get("/", jwtAuth.optional, async (req, res, next) => {
   try {
-    let limit = req.query.limit || 20;
-    let offset = req.query.offset || 0;
+    let limit = Number(req.query.limit) || 20;
+    let offset = Number(req.query.offset) || 0;
 
     let queries = ["author", "tags", "favorited"];
     let opts = {};
@@ -51,8 +51,8 @@ router.get("/", jwtAuth.optional, async (req, res, next) => {
 // Following Feed
 router.get("/feed", jwtAuth.required, async (req, res, next) => {
   try {
-    let limit = req.query.limit || 20;
-    let offset = req.query.offset || 0;
+    let limit = Number(req.query.limit) || 20;
+    let offset = Number(req.query.offset) || 0;
 
     let articles = await Article.find({
       author: { $in: req.user.following },
